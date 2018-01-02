@@ -7,7 +7,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         Title="文件加密器" Height="212.607" Width="600
-                      " ResizeMode="NoResize">
+                      " ResizeMode="NoResize" Loaded="window_main_Loaded">
     <Grid>
     <Label Content="选择文件：" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="92"/>
         <TextBox x:Name="txt_file" HorizontalAlignment="Left" Height="16" Margin="10,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="537" IsEnabled="False"/>

@@ -58,15 +58,16 @@ namespace Encryption
                         //先定义写入流
                         BinaryWriter bw;
                         //获取扩展名做文件头，文件头填充到64bytes
-                        string extension = System.IO.Path.GetExtension(filePath);
+                        string extension = Path.GetExtension(filePath);
                         byte[] extension_byte = Encoding.UTF8.GetBytes(extension);
-
+                        //填充扩展名的块到64bytes
                         byte[] extension_filled = new byte[64];
                         for (int i = 0; i < extension_byte.Length; i++)
                         {
                             extension_filled[i] = extension_byte[i];
                         }
-                        bw = new BinaryWriter(new FileStream(System.IO.Path.GetDirectoryName(filePath) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filePath) + ".brencrypted", FileMode.Create));
+                        //向加密文件写入文件头
+                        bw = new BinaryWriter(new FileStream(Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted", FileMode.Create));
                         bw.Write(extension_filled);
 
                         byte[] buffer;
@@ -119,16 +120,38 @@ namespace Encryption
                             //读取写在文件头的扩展名
                             byte[] extension_byte = br.ReadBytes(64);
                             extension = Encoding.UTF8.GetString(extension_byte).Replace("\0", "");
-                            //创建写入流
-                            BinaryWriter bw = new BinaryWriter(new FileStream(System.IO.Path.GetDirectoryName(filePath) + "\\" + System.IO.Path.GetFileNameWithoutExtension(filePath) + extension, FileMode.OpenOrCreate));
+                            //解密后文件地址
+                            string des_path = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + extension;
+                            //如果文件存在
+                            if (File.Exists(des_path))
+                            {
+                                if(MessageBox.Show("解密后的文件已存在，是否覆盖？", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
+                                {
+                                    return;
+                                }
+                            }
                             byte[] buffer;
+                            buffer = br.ReadBytes(256);
+                            //第一个块为密钥检测
+                            byte[] des_check = decrypt_aes(buffer, key);
+                            //检测是否正确
+                            if (des_check == null)
+                            {
+                                return;
+                            }
+                            //创建写入流
+                            BinaryWriter bw = new BinaryWriter(new FileStream(des_path, FileMode.OpenOrCreate));
+                            //写入检测块，开始解密后续部分
+                            bw.Write(des_check);
                             buffer = br.ReadBytes(256);
                             while (buffer.Length > 0)
                             {
+                                //密钥不对返回null
                                 byte[] decrypted = decrypt_aes(buffer, key);
                                 bw.Write(decrypted);
                                 buffer = br.ReadBytes(256);
                             }
+                            //关闭流
                             bw.Flush();
                             bw.Close();
                             br.Close();
@@ -147,7 +170,7 @@ namespace Encryption
                 Console.WriteLine(ioe.Message + "\nDecrypt File Error");
             }
         }
-
+        //加密算法
         public static byte[] encrypt_aes(byte[] block, string key)
         {
             byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
@@ -158,7 +181,7 @@ namespace Encryption
             ICryptoTransform transform = rdel.CreateEncryptor();
             return transform.TransformFinalBlock(block, 0, block.Length);
         }
-
+        //解密算法
         public static byte[] decrypt_aes(byte[] block, string key)
         {
             byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
@@ -168,7 +191,14 @@ namespace Encryption
             rDel.Padding = PaddingMode.PKCS7;
             ICryptoTransform cTransform = rDel.CreateDecryptor();
 
-            return cTransform.TransformFinalBlock(block, 0, block.Length);
+            try
+            {
+                return cTransform.TransformFinalBlock(block, 0, block.Length);
+            } catch (CryptographicException e)
+            {
+                MessageBox.Show("您输入的密钥有误");
+                return null;
+            }
         }
         //对key进行MD5处理
         public static string processKey(string key)
@@ -182,6 +212,12 @@ namespace Encryption
                 strb.Append(result[i].ToString("x2"));
             }
             return strb.ToString();
+        }
+
+        private void window_main_Loaded(object sender, RoutedEventArgs e)
+        {
+            //注册表检查
+
         }
     }
 }
