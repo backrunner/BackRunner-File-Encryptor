@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encryption", "Encryption\Encryption.csproj", "{D6C1E6C0-1D97-412F-86FF-F29EDB169C48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "br_encryptor", "Encryption\br_encryptor.csproj", "{D6C1E6C0-1D97-412F-86FF-F29EDB169C48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Updater", "Updater\Updater.csproj", "{8BAD53DF-98FC-4345-9F10-592C2243121B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "br_updater", "Updater\br_updater.csproj", "{8BAD53DF-98FC-4345-9F10-592C2243121B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombineTest", "CombineTest\CombineTest.csproj", "{ED7A67D6-ECDE-4C24-8413-F1CF22FF98A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{8BAD53DF-98FC-4345-9F10-592C2243121B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BAD53DF-98FC-4345-9F10-592C2243121B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BAD53DF-98FC-4345-9F10-592C2243121B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED7A67D6-ECDE-4C24-8413-F1CF22FF98A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED7A67D6-ECDE-4C24-8413-F1CF22FF98A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED7A67D6-ECDE-4C24-8413-F1CF22FF98A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED7A67D6-ECDE-4C24-8413-F1CF22FF98A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,49 +5,81 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Updater;
+using System.Windows;
+using System.Web;
 
-namespace Updater
+namespace BackRunner
 {
     class BRDownloader
     {
+        public static long currentFileLength = 0;
+        public static long downloadedLength = 0;
+
+        private MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
         public bool downloadFile(string localFilePath,string URL)
         {
-            bool isSuccess = false;
-            //上次的位置
-            long lastPosition = 0;
-            FileStream fs;
-            fs = new FileStream(localFilePath, FileMode.OpenOrCreate);
-            //读取文件长度，实现断点续传
-            lastPosition = fs.Length;
-            fs.Seek(lastPosition, SeekOrigin.Current);
+            bool isSuccess = true;
             try
             {
-                //建立request
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
-                if (lastPosition > 0)
+                using (WebClient wc = new WebClient())
                 {
-                    request.AddRange(range: lastPosition);
+                    wc.DownloadFile(new Uri(URL), localFilePath);
                 }
-                Stream stream = request.GetResponse().GetResponseStream();
-                byte[] content = new byte[512];
-                int size = 0;
-                size = stream.Read(content, 0, 512);
-                while (size > 0)
-                {
-                    //将流的数据写入文件
-                    fs.Write(content, 0, 512);
-                    size = stream.Read(content, 0, 512);
-                }
-                fs.Flush();
-                fs.Close();
-                isSuccess = true;
             } catch (Exception e)
             {
-                fs.Close();
+                MessageBox.Show(e.ToString());
                 isSuccess = false;
             }
-            //返回值为是否成功
             return isSuccess;
+        }
+
+        public bool existFile(string URL)
+        {
+            int count = 0;
+            bool isSuccess = true;
+            while (!checkFileExist(URL))
+            {
+                count++;
+                if (count > 5)
+                {
+                    isSuccess = false;
+                    break;
+                }
+            }
+            return isSuccess;
+        }
+
+        private bool checkFileExist(string URL)
+        {
+            HttpWebRequest req = null;
+            HttpWebResponse res = null;
+            try
+            {
+                req = (HttpWebRequest)WebRequest.Create(URL);
+                req.Method = "HEAD";
+                req.Timeout = 300;
+                res = (HttpWebResponse)req.GetResponse();
+                return (res.StatusCode == HttpStatusCode.OK);
+            }
+            catch
+            {
+                return false;
+            }
+            finally
+            {
+                //回收资源
+                if (res != null)
+                {
+                    res.Close();
+                    res = null;
+                }
+                if (req != null)
+                {
+                    req.Abort();
+                    req = null;
+                }
+            }
         }
     }
 }
