@@ -22,8 +22,8 @@ namespace Encryption
         }
 
         //版本号
-        public const string version = "beta 2";
-        public const int build = 3;
+        public const string version = "beta 3";
+        public const int build = 4;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
