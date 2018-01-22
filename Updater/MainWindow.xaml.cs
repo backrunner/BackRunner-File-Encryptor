@@ -21,7 +21,7 @@ namespace Updater
         }
 
         //版本号
-        public const string version = "beta 1";
+        public const string version = "beta 2";
         public const int build = 2;
 
         //应用信息

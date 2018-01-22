@@ -6,17 +6,18 @@
         xmlns:local="clr-namespace:Encryption"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="文件加密器" Height="216.35" Width="600
+        Title="文件加密器" Height="239.285" Width="600
                       " ResizeMode="NoResize" Loaded="window_main_Loaded">
     <Grid>
-    <Label x:Name="lbl_selectFile" Content="选择文件：" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="92"/>
+        <Label x:Name="lbl_selectFile" Content="选择文件：" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="92"/>
         <TextBox x:Name="txt_file" HorizontalAlignment="Left" Height="16" Margin="10,40,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="537" IsEnabled="False"/>
         <Button x:Name="btn_selectFile" Content="..." HorizontalAlignment="Left" Margin="552,39,0,0" VerticalAlignment="Top" Width="30" Click="btn_selectFile_Click"/>
-        <Button x:Name="btn_decrypt" Content="解密" HorizontalAlignment="Left" Margin="511,145,0,0" VerticalAlignment="Top" Width="71" Click="btn_decrypt_Click"/>
-        <Button x:Name="btn_encrypt" Content="加密" HorizontalAlignment="Left" Margin="435,145,0,0" VerticalAlignment="Top" Width="71" Click="btn_encrypt_Click"/>
+        <Button x:Name="btn_decrypt" Content="解密" HorizontalAlignment="Left" Margin="511,173,0,0" VerticalAlignment="Top" Width="71" Click="btn_decrypt_Click"/>
+        <Button x:Name="btn_encrypt" Content="加密" HorizontalAlignment="Left" Margin="435,173,0,0" VerticalAlignment="Top" Width="71" Click="btn_encrypt_Click"/>
         <Label Content="密钥：" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" Width="92"/>
         <PasswordBox x:Name="pwd_key"  HorizontalAlignment="Left" Margin="10,101,0,0" VerticalAlignment="Top" Width="572"/>
-        <Label x:Name="lbl_progress" Content="" HorizontalAlignment="Left" Margin="10,145,0,0" VerticalAlignment="Top" Width="410"/>
+        <Label x:Name="lbl_progress" Content="" HorizontalAlignment="Left" Margin="10,173,0,0" VerticalAlignment="Top" Width="410"/>
+        <CheckBox x:Name="cb_selfextract" Content="自解压" HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Checked="cb_selfextract_Checked" Unchecked="cb_selfextract_Unchecked"/>
     </Grid>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
