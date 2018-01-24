@@ -18,6 +18,7 @@
         <PasswordBox x:Name="pwd_key"  HorizontalAlignment="Left" Margin="10,101,0,0" VerticalAlignment="Top" Width="572"/>
         <Label x:Name="lbl_progress" Content="" HorizontalAlignment="Left" Margin="10,173,0,0" VerticalAlignment="Top" Width="410"/>
         <CheckBox x:Name="cb_selfextract" Content="自解压" HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Checked="cb_selfextract_Checked" Unchecked="cb_selfextract_Unchecked"/>
+        <CheckBox x:Name="cb_deleteOrigin" Content="加/解密完成后删除源文件" HorizontalAlignment="Left" Margin="125,140,0,0" VerticalAlignment="Top" Checked="cb_deleteOrigin_Checked" Unchecked="cb_deleteOrigin_Unchecked"/>
     </Grid>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>

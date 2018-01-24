@@ -23,7 +23,7 @@ namespace Encryption
 
         //版本号
         public const string version = "beta 3";
-        public const int build = 4;
+        public const int build = 5;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -36,6 +36,9 @@ namespace Encryption
         //mode 0:单文件
         //mode 1:文件夹
         public int mode = 0;
+        //是否已经弹出过删除源文件警告框
+        public bool isDeleteOriginMessage = false;
+        public bool isDeleteOrigin = false;
 
         //自解压
         public static bool isSelfExtract = false;
@@ -215,6 +218,7 @@ namespace Encryption
                 //有自解压
                 switch (mode)
                 {
+                    //单文件
                     case 0:
                         //检测是否选择文件
                         if (filePath.Length <= 0)
@@ -243,6 +247,114 @@ namespace Encryption
                             encrypt_file(filePath, key);
                             bind_file(filePath);
                         }
+                        break;
+                    //文件夹
+                    case 1:
+                        //检测是否选择文件
+                        if (filePath.Length <= 0)
+                        {
+                            MessageBox.Show("请先选择文件夹。");
+                            return;
+                        }
+                        //获取密钥
+                        key = pwd_key.Password;
+                        //检测密钥
+                        if (key.Length <= 0)
+                        {
+                            MessageBox.Show("请先输入密钥。");
+                            return;
+                        }
+                        else
+                        {
+                            key = processKey(key);
+                        }
+                        //确认加密
+                        if (MessageBox.Show("您确定要加密该文件夹下的所有文件吗？\n程序会自动重命名文件名相同但格式不同的文件。", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+                        {
+                            var files = Directory.GetFiles(filePath, "*");
+                            //检查文件名以防止重叠
+                            if (files.Length > 1)
+                            {
+                                lbl_progress.Content = "正在检查文件名...";
+                                int filecheck_count = 2;
+                                for (int i = 0; i < files.Length - 1; i++)
+                                {
+                                    for (int j = 1; j < files.Length; j++)
+                                    {
+                                        if (Path.GetFileNameWithoutExtension(files[j]) == Path.GetFileNameWithoutExtension(files[i]))
+                                        {
+                                            try
+                                            {
+                                                File.Move(files[j], Path.GetDirectoryName(files[j]) + @"\" + Path.GetFileNameWithoutExtension(files[j]) + "_" + filecheck_count.ToString() + "_" + Path.GetExtension(files[j]).Replace(".", "") + Path.GetExtension(files[j]));
+                                            }
+                                            catch (Exception check_e)
+                                            {
+                                                MessageBox.Show("文件检查错误，加密中断\n错误信息：\n" + check_e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            //重新获取文件
+                            files = Directory.GetFiles(filePath, "*");
+                            //对文件夹进行加密
+                            bool isSuccess = true;
+                            int count = 0;
+                            int skipcount = 0;
+                            string errorFilePath = "";
+                            foreach (var file in files)
+                            {
+                                lbl_progress.Content = "正在加密： " + Path.GetFileName(file) + " ，第 " + (count + skipcount + 1).ToString() + " / " + files.Length + " 个";
+                                //加密文件跳过
+                                if (Path.GetExtension(file) == ".brencrypted")
+                                {
+                                    skipcount++;
+                                }
+                                else
+                                {
+                                    if (!encrypt_file(file, key))
+                                    {
+                                        isSuccess = false;
+                                        errorFilePath = file;
+                                        break;
+                                    }
+                                    if (!bind_file(file))
+                                    {
+                                        isSuccess = false;
+                                        errorFilePath = file;
+                                        break;
+                                    } else
+                                    {
+                                        count++;
+                                    }
+                                }
+                            }
+                            if (isSuccess)
+                            {
+                                if (skipcount == 0)
+                                {
+                                    if (MessageBox.Show("文件加密完成，共加密 " + count.ToString() + " 个文件\n是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                                    {
+                                        Process.Start(filePath);
+                                    }
+                                }
+                                else
+                                {
+                                    if (MessageBox.Show("文件加密完成，共加密 " + count.ToString() + " 个文件，其中跳过了 " + skipcount.ToString() + " 个加密文件\n是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                                    {
+                                        Process.Start(filePath);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (MessageBox.Show("批量加密已中断，已加密 " + count.ToString() + " 个文件\n错误文件：\n\n是否打开文件夹？" + errorFilePath, "中断", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                                {
+                                    Process.Start(filePath);
+                                }
+                            }
+                        }
+                        lbl_progress.Content = "";
                         break;
                 }
             }
@@ -295,19 +407,41 @@ namespace Encryption
                     br.Close();
                     tempbr.Close();
                     File.Delete(cachePath);
-                    if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                    if (mode == 0)
                     {
-                        Process.Start(Path.GetDirectoryName(filePath));
+                        if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                        {
+                            Process.Start(Path.GetDirectoryName(filePath));
+                        }
                     }
                 } catch (Exception e)
                 {
-                    MessageBox.Show("创建加密文件时遇到错误，错误如下：\n\n"+e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    if (mode == 0)
+                    {
+                        MessageBox.Show("创建加密文件时遇到错误，错误如下：\n\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                     return false;
                 }
             } else
             {
-                MessageBox.Show("找不到br_extractor.exe，无法制作自解压程式。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (mode == 0)
+                {
+                    MessageBox.Show("找不到br_extractor.exe，无法制作自解压程式。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 return false;
+            }
+            if (isDeleteOrigin)
+            {
+                try
+                {
+                    File.Delete(filePath);
+                } catch(Exception e)
+                {
+                    if (mode == 0)
+                    {
+                        throw (e);
+                    }
+                }
             }
             return true;
         }
@@ -369,12 +503,29 @@ namespace Encryption
                         bw.Flush();
                         br.Close();
                         bw.Close();
+                        //弹出成功框
                         if (mode == 0 && !isSelfExtract)
                         {
                             if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                             {
                                 Process.Start(Path.GetDirectoryName(filePath));
                             }
+                        }
+                        //删除源文件
+                        if (!isSelfExtract && isDeleteOrigin)
+                        {
+                            try
+                            {
+                                File.Delete(filePath);
+                            }
+                            catch(Exception e)
+                            {
+                                if (mode == 0)
+                                {
+                                    throw (e);
+                                }
+                            }
+                            
                         }
                         return true;
                     }
@@ -539,6 +690,19 @@ namespace Encryption
                                     Process.Start(Path.GetDirectoryName(filePath));
                                 }
                             }
+                            if (isDeleteOrigin)
+                            {
+                                try
+                                {
+                                    File.Delete(filePath);
+                                } catch (Exception e)
+                                {
+                                    if (mode == 0)
+                                    {
+                                        throw (e);
+                                    }
+                                }
+                            }
                             return true;
                         }
                         else
@@ -649,6 +813,17 @@ namespace Encryption
 
             //拉起自动更新
             Process.Start(startupDirectory + "\\br_updater.exe");
+
+            //更新自解压check
+            switch(ini.readValue("config", "selfextract"))
+            {
+                default:
+                    cb_selfextract.IsChecked = false;
+                    break;
+                case "true":
+                    cb_selfextract.IsChecked = true;
+                    break;
+            }
         }
 
         //右上角菜单定义
@@ -688,15 +863,41 @@ namespace Encryption
             }
         }
 
-        //实时更新ini
+        //实时更新
         private void cb_selfextract_Checked(object sender, RoutedEventArgs e)
         {
-
+            string configPath = startupDirectory + "\\config.ini";
+            IniFile ini = new IniFile(configPath);
+            ini.writeValue("config", "selfextract", "true");
         }
 
         private void cb_selfextract_Unchecked(object sender, RoutedEventArgs e)
         {
+            string configPath = startupDirectory + "\\config.ini";
+            IniFile ini = new IniFile(configPath);
+            ini.writeValue("config", "selfextract", "false");
+        }
 
+        //删除源文件复选框逻辑
+        private void cb_deleteOrigin_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isDeleteOriginMessage)
+            {
+                if (MessageBox.Show("您确定要在加/解密完成后删除源文件吗？", "警告", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) == MessageBoxResult.Yes)
+                {
+                    isDeleteOrigin = true;
+                    isDeleteOriginMessage = true;
+                } else
+                {
+                    isDeleteOrigin = false;
+                    cb_deleteOrigin.IsChecked = false;
+                }
+            }
+        }
+
+        private void cb_deleteOrigin_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isDeleteOrigin = false;
         }
     }
 }
