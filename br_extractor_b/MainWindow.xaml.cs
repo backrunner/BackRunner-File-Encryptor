@@ -31,7 +31,8 @@ namespace br_extractor
         //应用路径信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
         public static string startupDirectory = Path.GetDirectoryName(startupPath);
-        public static string cachePath = startupDirectory + "/" + Path.GetFileNameWithoutExtension(startupPath) + ".brtemp";
+        public static string tempPath = Environment.GetEnvironmentVariable("TEMP");
+        public static string cachePath = tempPath + "/" + Path.GetFileNameWithoutExtension(startupPath) + ".brtemp";
 
         private bool extract_file()
         {
@@ -136,10 +137,12 @@ namespace br_extractor
                             bw.Close();
                             br.Close();
                             File.Delete(cachePath);
-                            if (MessageBox.Show("文件解密完成，是否打开文件？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
-                            {
-                                Process.Start(filePath);
-                            }                            
+                            Process p = Process.Start(des_path);
+                            this.ShowInTaskbar = false;
+                            this.Visibility = Visibility.Hidden;
+                            p.WaitForExit();
+                            File.Delete(des_path);
+                            Environment.Exit(0);
                         }
                     }
                 }
@@ -148,7 +151,7 @@ namespace br_extractor
             catch (Exception e)
             {
                 Console.WriteLine(e.Message + "\nEncrypt File Error");
-                MessageBox.Show("解密文件错误。错误信息：\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("解密文件错误。错误信息：\n" + e.Message,"错误",MessageBoxButton.OK,MessageBoxImage.Error);
                 try
                 {
                     File.Delete(cachePath);

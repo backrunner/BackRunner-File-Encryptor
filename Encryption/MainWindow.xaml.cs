@@ -31,11 +31,17 @@ namespace Encryption
 
         //加密文件的位置
         public string filePath;
-
         //应用设置
         //mode 0:单文件
         //mode 1:文件夹
-        public int mode = 0;
+        public short mode = 0;
+
+        //自解压设置
+        //mode 1:普通
+        //mode 2:临时
+        //mode 3:可自更新
+        public short extractMode = 1;
+
         //是否已经弹出过删除源文件警告框
         public bool isDeleteOriginMessage = false;
         public bool isDeleteOrigin = false;
@@ -362,12 +368,23 @@ namespace Encryption
         //捆绑文件
         private bool bind_file(string filePath)
         {
+            string extractorPath = "";
+            switch (extractMode) {
+                case 1:
+                    extractorPath = startupDirectory + "/extractor/br_extractor.exe";
+                    break;
+                case 2:
+                    extractorPath = startupDirectory + "/extractor/br_extractor_b.exe";
+                    break;
+                case 3:
+                    extractorPath = startupDirectory + "/extractor/br_extractor_c.exe";
+                    break;
+            }
             //检查自解压文件是否存在
             if (File.Exists(startupDirectory + "/br_extractor.exe"))
             {
                 //路径定义 & 流定义
-                string cachePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";
-                string extractorPath = startupDirectory + "/extractor/br_extractor.exe";
+                string cachePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";                
                 string outputPath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted.exe";
                 BinaryReader br = new BinaryReader(new FileStream(extractorPath, FileMode.Open));
                 BinaryReader tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open));
@@ -768,6 +785,7 @@ namespace Encryption
             return strb.ToString();
         }
 
+        //窗体load
         private void window_main_Loaded(object sender, RoutedEventArgs e)
         {
             //程序名称检查
@@ -811,6 +829,7 @@ namespace Encryption
                 updateini.writeValue("app", "name", "br_encryptor");
             }
 
+
             //拉起自动更新
             Process.Start(startupDirectory + "\\br_updater.exe");
 
@@ -822,6 +841,24 @@ namespace Encryption
                     break;
                 case "true":
                     cb_selfextract.IsChecked = true;
+                    radio_extract_a.Visibility = Visibility.Visible;
+                    radio_extract_b.Visibility = Visibility.Visible;
+                    radio_extract_c.Visibility = Visibility.Visible;
+                    break;
+            }
+            switch (ini.readValue("config", "extractmode"))
+            {
+                default:
+                    radio_extract_a.IsChecked = true;
+                    break;
+                case "1":
+                    radio_extract_a.IsChecked = true;
+                    break;
+                case "2":
+                    radio_extract_b.IsChecked = true;
+                    break;
+                case "3":
+                    radio_extract_c.IsChecked = true;
                     break;
             }
         }
@@ -863,21 +900,6 @@ namespace Encryption
             }
         }
 
-        //实时更新
-        private void cb_selfextract_Checked(object sender, RoutedEventArgs e)
-        {
-            string configPath = startupDirectory + "\\config.ini";
-            IniFile ini = new IniFile(configPath);
-            ini.writeValue("config", "selfextract", "true");
-        }
-
-        private void cb_selfextract_Unchecked(object sender, RoutedEventArgs e)
-        {
-            string configPath = startupDirectory + "\\config.ini";
-            IniFile ini = new IniFile(configPath);
-            ini.writeValue("config", "selfextract", "false");
-        }
-
         //删除源文件复选框逻辑
         private void cb_deleteOrigin_Checked(object sender, RoutedEventArgs e)
         {
@@ -898,6 +920,76 @@ namespace Encryption
         private void cb_deleteOrigin_Unchecked(object sender, RoutedEventArgs e)
         {
             isDeleteOrigin = false;
+        }
+
+        //自解压单选框逻辑
+        private void radio_extract_a_Checked(object sender, RoutedEventArgs e)
+        {
+            radio_extract_b.IsChecked = false;
+            radio_extract_c.IsChecked = false;
+            extractMode = 1;
+        }
+
+        private void radio_extract_b_Checked(object sender, RoutedEventArgs e)
+        {
+            radio_extract_a.IsChecked = false;
+            radio_extract_c.IsChecked = false;
+            extractMode = 2;
+        }
+
+        private void radio_extract_c_Checked(object sender, RoutedEventArgs e)
+        {
+            radio_extract_a.IsChecked = false;
+            radio_extract_b.IsChecked = false;
+            extractMode = 3;
+        }
+
+        //窗体退出
+        private void window_main_Closed(object sender, EventArgs e)
+        {
+            //保存设置
+            string configPath = startupDirectory + "\\config.ini";
+            IniFile ini = new IniFile(configPath);
+            //自解压
+            if ((bool)cb_selfextract.IsChecked)
+            {
+                ini.writeValue("config", "selfextract", "true");
+            }
+            else
+            {
+                ini.writeValue("config", "selfextract", "false");
+            }
+            //自解压模式
+            switch (extractMode)
+            {
+                case 1:
+                    ini.writeValue("config", "extractmode", "1");
+                    break;
+                case 2:
+                    ini.writeValue("config", "extractmode", "2");
+                    break;
+                case 3:
+                    ini.writeValue("config", "extractmode", "3");
+                    break;
+                default:
+                    ini.writeValue("config", "extractmode", "1");
+                    break;
+            }
+        }
+
+        //自解压复选框UI逻辑
+        private void cb_selfextract_Checked(object sender, RoutedEventArgs e)
+        {
+            radio_extract_a.Visibility = Visibility.Visible;
+            radio_extract_b.Visibility = Visibility.Visible;
+            radio_extract_c.Visibility = Visibility.Visible;
+        }
+
+        private void cb_selfextract_Unchecked(object sender, RoutedEventArgs e)
+        {
+            radio_extract_a.Visibility = Visibility.Hidden;
+            radio_extract_b.Visibility = Visibility.Hidden;
+            radio_extract_c.Visibility = Visibility.Hidden;
         }
     }
 }
