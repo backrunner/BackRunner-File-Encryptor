@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Diagnostics;
 using BackRunner;
 using System.Linq;
+using System.Security.Permissions;
+using System.Security;
 
 namespace Encryption
 {
@@ -23,7 +25,7 @@ namespace Encryption
 
         //版本号
         public const string version = "1.0";
-        public const int build = 11;
+        public const int build = 16;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -394,8 +396,8 @@ namespace Encryption
             //检查自解压文件是否存在
             if (File.Exists(extractorPath))
             {
-                BinaryReader br = new BinaryReader(new FileStream(extractorPath, FileMode.Open));
-                BinaryReader tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open));
+                BinaryReader br = new BinaryReader(new FileStream(extractorPath, FileMode.Open, FileAccess.Read));
+                BinaryReader tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open, FileAccess.Read));
                 BinaryWriter bw = new BinaryWriter(new FileStream(outputPath, FileMode.Create));
 
                 try
@@ -526,7 +528,7 @@ namespace Encryption
                             extension_filled[i] = extension_byte[i];
                         }
                         //向加密文件写入文件头
-                        bw = new BinaryWriter(new FileStream(encryptedFilePath, FileMode.Create));
+                        bw = new BinaryWriter(new FileStream(encryptedFilePath, FileMode.Create, FileAccess.ReadWrite));
                         bw.Write(extension_filled);
 
                         byte[] buffer;
@@ -571,8 +573,7 @@ namespace Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message + "\nEncrypt File Error");
-                MessageBox.Show("加密文件错误。错误信息：\n" + e.Message);
+                MessageBox.Show("加密文件错误。错误信息：\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
         }
@@ -845,7 +846,13 @@ namespace Encryption
             //清理cache目录
             if (Directory.Exists(startupDirectory + "\\cache"))
             {
-                Directory.Delete(startupDirectory + "\\cache",true);
+                try
+                {
+                    Directory.Delete(startupDirectory + "\\cache", true);
+                }
+                catch (Exception de)
+                {
+                }
             }
 
             //检查自动更新配置
@@ -860,7 +867,7 @@ namespace Encryption
 
             //拉起自动更新
             Process update_process = Process.Start(startupDirectory + "\\br_updater.exe");
-            
+
             //更新自解压check
             switch (ini.readValue("config", "selfextract"))
             {

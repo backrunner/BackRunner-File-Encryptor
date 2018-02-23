@@ -116,7 +116,7 @@ namespace br_extractor
                         {
                             //读取写在文件头的扩展名
                             byte[] extension_byte = br.ReadBytes(64);
-                            extension = Encoding.UTF8.GetString(extension_byte).Replace("\0", "");
+                            extension = Encoding.UTF8.GetString(extension_byte).Replace("\0","");
                             //解密后文件地址
                             des_path = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath).Replace(".brencrypted","").Replace(".brtemp","") + extension;                            
                             byte[] buffer;
@@ -188,12 +188,9 @@ namespace br_extractor
                 if (bind_file(encryptedFilePath, exePath))
                 {
                     //生成自删除bat
-                    string batPath = startupDirectory + Path.GetFileNameWithoutExtension(startupPath) + ".brtemp.bat";
-                    StreamWriter sw = new StreamWriter(new FileStream(batPath, FileMode.Create));
-                    string bat = ":del\r\n  del " + startupPath + "\r\nif exist " + startupPath + " goto del\r\nren " + Path.GetFileNameWithoutExtension(filePath) + ".new.brencrypted.exe " + Path.GetFileName(startupPath) + "\r\ndel %0";
-                    //编码转换
-                    byte[] bat_bytes = Encoding.UTF8.GetBytes(bat);
-                    bat = Encoding.ASCII.GetString(bat_bytes);
+                    string batPath = startupDirectory + "\\" + Path.GetFileNameWithoutExtension(startupPath) + ".brtemp.bat";
+                    StreamWriter sw = new StreamWriter(new FileStream(batPath, FileMode.Create),Encoding.Default);
+                    string bat = ":deletefile\r\n  del \"" + startupPath + "\"\r\nif exist \"" + startupPath + "\" goto deletefile\r\nren \"" + Path.GetFileNameWithoutExtension(filePath) + ".new.brencrypted.exe\" \"" + Path.GetFileName(startupPath) + "\"\r\ndel \""+batPath+"\"";
                     sw.Write(bat);
                     sw.Flush();
                     sw.Close();
@@ -362,31 +359,39 @@ namespace br_extractor
         //对key进行MD5处理
         public static string processKey(string key)
         {
-            byte[] source = Encoding.UTF8.GetBytes(key);
-            MD5 md5 = MD5.Create();
-            byte[] result = md5.ComputeHash(source);
-            StringBuilder strb = new StringBuilder(40);
-            for (int i = 0; i < result.Length; i++)
+            try
             {
-                strb.Append(result[i].ToString("x2"));
+                byte[] source = Encoding.UTF8.GetBytes(key);
+                MD5 md5 = MD5.Create();
+                byte[] result = md5.ComputeHash(source);
+                StringBuilder strb = new StringBuilder(40);
+                for (int i = 0; i < result.Length; i++)
+                {
+                    strb.Append(result[i].ToString("x2"));
+                }
+                return strb.ToString();
+            } catch (Exception e)
+            {
+                MessageBox.Show("处理Key的时候发生错误。\n\n错误信息：\n\n" + e.Message);
+                return "";
             }
-            return strb.ToString();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btn_submit_Click(object sender, RoutedEventArgs e)
         {
-            key = processKey(pwd_input.Password);
+            key = processKey(pwd_input.Password);            
             if (extract_file())
             {
-                if(!decrypt_file(cachePath, key))
+                if (!decrypt_file(cachePath, key))
                 {
                     Environment.Exit(0);
                 }
-            } else
+            }
+            else
             {
                 File.Delete(cachePath);
                 Environment.Exit(0);
-            }            
+            }
         }
     }
 }

@@ -184,31 +184,40 @@ namespace br_extractor
         //对key进行MD5处理
         public static string processKey(string key)
         {
-            byte[] source = Encoding.UTF8.GetBytes(key);
-            MD5 md5 = MD5.Create();
-            byte[] result = md5.ComputeHash(source);
-            StringBuilder strb = new StringBuilder(40);
-            for (int i = 0; i < result.Length; i++)
+            try
             {
-                strb.Append(result[i].ToString("x2"));
+                byte[] source = Encoding.UTF8.GetBytes(key);
+                MD5 md5 = MD5.Create();
+                byte[] result = md5.ComputeHash(source);
+                StringBuilder strb = new StringBuilder(40);
+                for (int i = 0; i < result.Length; i++)
+                {
+                    strb.Append(result[i].ToString("x2"));
+                }
+                return strb.ToString();
             }
-            return strb.ToString();
+            catch (Exception e)
+            {
+                MessageBox.Show("处理Key的时候发生错误。\n\n错误信息：\n\n" + e.Message);
+                return "";
+            }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btn_submit_Click(object sender, RoutedEventArgs e)
         {
             string key = processKey(pwd_input.Password);
             if (extract_file())
             {
-                if(!decrypt_file(cachePath, key))
+                if (!decrypt_file(cachePath, key))
                 {
                     Environment.Exit(0);
                 }
-            } else
+            }
+            else
             {
                 File.Delete(cachePath);
                 Environment.Exit(0);
-            }            
+            }
         }
     }
 }
