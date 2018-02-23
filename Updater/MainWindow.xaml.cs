@@ -21,8 +21,8 @@ namespace Updater
         }
 
         //版本号
-        public const string version = "beta 2";
-        public const int build = 2;
+        public const string version = "beta 3";
+        public const int build = 3;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -39,6 +39,8 @@ namespace Updater
         //DLLImport
         [DllImport("wininet.dll")]
         private extern static bool InternetGetConnectedState(int Description, int ReservedValue);
+        [DllImport("kernel32.dll")]
+        public static extern uint WinExec(string lpCmdLine, uint uCmdShow);
 
         //启动
         public void startup()
@@ -47,7 +49,7 @@ namespace Updater
             string appName = Path.GetFileName(startupPath);
             if (appName != "br_updater.exe")
             {
-                MessageBox.Show("请勿重命名程序(br_updater.exe)，这将造成程序功能错误！","错误",MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show("请勿重命名程序(br_updater.exe)，这将造成程序功能错误！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 //错误则退出
                 Environment.Exit(0);
             }
@@ -118,7 +120,7 @@ namespace Updater
         {
             if (!IsConnectInternet())
             {
-                System.Environment.Exit(0);
+                Environment.Exit(0);
             }
         }
         public static bool IsConnectInternet()
@@ -286,17 +288,19 @@ namespace Updater
                     if (File.Exists(extractDirectory + "update.exe"))
                     {
                         Process.Start(extractDirectory + "update.exe");
+                        Environment.Exit(0);
                     }
                     else
                     {
                         if (File.Exists(extractDirectory + "update.bat"))
                         {
-                            Process.Start(extractDirectory + "update.bat");
+                            WinExec(extractDirectory + "update.bat", 0);
+                            Environment.Exit(0);
                         }
                         else
                         {
                             MessageBox.Show("未找到更新程序或脚本", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
-                            Directory.Delete(extractDirectory,true);
+                            Directory.Delete(extractDirectory, true);
                             return;
                         }
                     }

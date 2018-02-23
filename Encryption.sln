@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "br_extractor", "br_extracto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "br_extractor_b", "br_extractor_b\br_extractor_b.csproj", "{A14BD78B-8EED-4C38-B069-E85B3AE089CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "br_extractor_c", "br_extractor_c\br_extractor_c.csproj", "{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{A14BD78B-8EED-4C38-B069-E85B3AE089CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A14BD78B-8EED-4C38-B069-E85B3AE089CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A14BD78B-8EED-4C38-B069-E85B3AE089CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

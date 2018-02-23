@@ -100,7 +100,7 @@ namespace br_extractor
                             byte[] extension_byte = br.ReadBytes(64);
                             extension = Encoding.UTF8.GetString(extension_byte).Replace("\0", "");
                             //解密后文件地址
-                            string des_path = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath).Replace(".brencrypted","") + extension;                            
+                            string des_path = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath).Replace(".brtemp","") + extension;                            
                             byte[] buffer;
                             buffer = br.ReadBytes(256);
                             //第一个块为密钥检测
@@ -115,10 +115,7 @@ namespace br_extractor
                             //如果文件存在
                             if (File.Exists(des_path))
                             {
-                                if (MessageBox.Show("当前文件：\n" + Path.GetFileName(filePath).Replace(".brtemp","") + "\n解密后的文件已存在，是否覆盖？", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
-                                {
-                                    return true;
-                                }
+                                File.Delete(des_path);
                             }
                             //创建写入流
                             BinaryWriter bw = new BinaryWriter(new FileStream(des_path, FileMode.OpenOrCreate));

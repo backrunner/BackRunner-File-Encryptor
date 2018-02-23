@@ -18,14 +18,16 @@
         <PasswordBox x:Name="pwd_key"  HorizontalAlignment="Left" Margin="10,101,0,0" VerticalAlignment="Top" Width="572"/>
         <Label x:Name="lbl_progress" Content="" HorizontalAlignment="Left" Margin="10,197,0,0" VerticalAlignment="Top" Width="410"/>
         <CheckBox x:Name="cb_selfextract" Content="自解压" HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Checked="cb_selfextract_Checked" Unchecked="cb_selfextract_Unchecked"/>
-        <CheckBox x:Name="cb_deleteOrigin" Content="加/解密完成后删除源文件" HorizontalAlignment="Left" Margin="230,140,0,0" VerticalAlignment="Top" Checked="cb_deleteOrigin_Checked" Unchecked="cb_deleteOrigin_Unchecked"/>
+        <CheckBox x:Name="cb_deleteOrigin" Content="加/解密完成后删除源文件" HorizontalAlignment="Left" Margin="104,140,0,0" VerticalAlignment="Top" Checked="cb_deleteOrigin_Checked" Unchecked="cb_deleteOrigin_Unchecked"/>
         <RadioButton x:Name="radio_extract_a" Content="普通" HorizontalAlignment="Left" Margin="10,167,0,0" VerticalAlignment="Top" Checked="radio_extract_a_Checked" Visibility="Hidden"/>
         <RadioButton x:Name="radio_extract_b" Content="临时" HorizontalAlignment="Left" Margin="77,167,0,0" VerticalAlignment="Top" Checked="radio_extract_b_Checked" Visibility="Hidden"/>
         <RadioButton x:Name="radio_extract_c" Content="自更新" HorizontalAlignment="Left" Margin="144,167,0,0" VerticalAlignment="Top" Checked="radio_extract_c_Checked" Visibility="Hidden"/>
+        <CheckBox x:Name="cb_messageBox" Content="加/解密完成后显示提示弹窗" HorizontalAlignment="Left" Margin="295,140,0,0" VerticalAlignment="Top" Checked="cb_messageBox_Checked" Unchecked="cb_messageBox_Unchecked"/>
     </Grid>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button x:Name="btn_batch" Content="批量加/解密" Click="btn_batch_Click" />
+            <Button x:Name="btn_about" Content="关于" Click="btn_about_Click"/>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
 </Controls:MetroWindow>

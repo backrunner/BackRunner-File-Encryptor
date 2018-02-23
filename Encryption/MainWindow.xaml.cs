@@ -22,8 +22,8 @@ namespace Encryption
         }
 
         //版本号
-        public const string version = "beta 3";
-        public const int build = 5;
+        public const string version = "1.0";
+        public const int build = 11;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -46,8 +46,14 @@ namespace Encryption
         public bool isDeleteOriginMessage = false;
         public bool isDeleteOrigin = false;
 
+        //提示弹窗
+        public bool showMessageBox = true;
+
         //自解压
         public static bool isSelfExtract = false;
+
+        //载入about窗体
+        private about about = new about();
 
         private void btn_selectFile_Click(object sender, RoutedEventArgs e)
         {
@@ -191,7 +197,7 @@ namespace Encryption
                             }
                             if (isSuccess)
                             {
-                                if (skipcount == 0)
+                                if (skipcount == 0 && showMessageBox)
                                 {
                                     if (MessageBox.Show("文件加密完成，共加密 " + count.ToString() + " 个文件\n是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                                     {
@@ -329,7 +335,8 @@ namespace Encryption
                                         isSuccess = false;
                                         errorFilePath = file;
                                         break;
-                                    } else
+                                    }
+                                    else
                                     {
                                         count++;
                                     }
@@ -337,7 +344,7 @@ namespace Encryption
                             }
                             if (isSuccess)
                             {
-                                if (skipcount == 0)
+                                if (skipcount == 0 && showMessageBox)
                                 {
                                     if (MessageBox.Show("文件加密完成，共加密 " + count.ToString() + " 个文件\n是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                                     {
@@ -369,7 +376,8 @@ namespace Encryption
         private bool bind_file(string filePath)
         {
             string extractorPath = "";
-            switch (extractMode) {
+            switch (extractMode)
+            {
                 case 1:
                     extractorPath = startupDirectory + "/extractor/br_extractor.exe";
                     break;
@@ -380,12 +388,12 @@ namespace Encryption
                     extractorPath = startupDirectory + "/extractor/br_extractor_c.exe";
                     break;
             }
+            //路径定义 & 流定义
+            string cachePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";
+            string outputPath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted.exe";
             //检查自解压文件是否存在
-            if (File.Exists(startupDirectory + "/br_extractor.exe"))
+            if (File.Exists(extractorPath))
             {
-                //路径定义 & 流定义
-                string cachePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";                
-                string outputPath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted.exe";
                 BinaryReader br = new BinaryReader(new FileStream(extractorPath, FileMode.Open));
                 BinaryReader tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open));
                 BinaryWriter bw = new BinaryWriter(new FileStream(outputPath, FileMode.Create));
@@ -424,14 +432,15 @@ namespace Encryption
                     br.Close();
                     tempbr.Close();
                     File.Delete(cachePath);
-                    if (mode == 0)
+                    if (mode == 0 && showMessageBox)
                     {
                         if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                         {
                             Process.Start(Path.GetDirectoryName(filePath));
                         }
                     }
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     if (mode == 0)
                     {
@@ -439,11 +448,20 @@ namespace Encryption
                     }
                     return false;
                 }
-            } else
+            }
+            else
             {
                 if (mode == 0)
                 {
-                    MessageBox.Show("找不到br_extractor.exe，无法制作自解压程式。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("找不到br_extractor，无法制作自解压程式。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                try
+                {
+                    File.Delete(cachePath);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.Message);
                 }
                 return false;
             }
@@ -452,7 +470,8 @@ namespace Encryption
                 try
                 {
                     File.Delete(filePath);
-                } catch(Exception e)
+                }
+                catch (Exception e)
                 {
                     if (mode == 0)
                     {
@@ -471,7 +490,8 @@ namespace Encryption
                 if (isSelfExtract)
                 {
                     encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";
-                } else
+                }
+                else
                 {
                     encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted";
                 }
@@ -483,7 +503,8 @@ namespace Encryption
                         {
                             return true;
                         }
-                    } else
+                    }
+                    else
                     {
                         File.Delete(encryptedFilePath);
                     }
@@ -521,7 +542,7 @@ namespace Encryption
                         br.Close();
                         bw.Close();
                         //弹出成功框
-                        if (mode == 0 && !isSelfExtract)
+                        if (mode == 0 && !isSelfExtract && showMessageBox)
                         {
                             if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                             {
@@ -535,14 +556,14 @@ namespace Encryption
                             {
                                 File.Delete(filePath);
                             }
-                            catch(Exception e)
+                            catch (Exception e)
                             {
                                 if (mode == 0)
                                 {
                                     throw (e);
                                 }
                             }
-                            
+
                         }
                         return true;
                     }
@@ -623,7 +644,7 @@ namespace Encryption
                                     count++;
                                 }
                             }
-                            if (isSuccess)
+                            if (isSuccess && showMessageBox)
                             {
                                 if (MessageBox.Show("文件解密完成，共解密 " + count.ToString() + " 个文件\n是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                                 {
@@ -653,7 +674,7 @@ namespace Encryption
         {
             try
             {
-                using (FileStream fs = new FileStream(filePath, FileMode.Open,FileAccess.Read))
+                using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
                 {
                     using (BinaryReader br = new BinaryReader(fs, new UTF8Encoding()))
                     {
@@ -683,7 +704,7 @@ namespace Encryption
                                 {
                                     return true;
                                 }
-                            }                            
+                            }
                             //创建写入流
                             BinaryWriter bw = new BinaryWriter(new FileStream(des_path, FileMode.OpenOrCreate));
                             //写入检测块，开始解密后续部分
@@ -700,7 +721,7 @@ namespace Encryption
                             bw.Flush();
                             bw.Close();
                             br.Close();
-                            if (mode == 0)
+                            if (mode == 0 && showMessageBox)
                             {
                                 if (MessageBox.Show("文件解密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                                 {
@@ -712,7 +733,8 @@ namespace Encryption
                                 try
                                 {
                                     File.Delete(filePath);
-                                } catch (Exception e)
+                                }
+                                catch (Exception e)
                                 {
                                     if (mode == 0)
                                     {
@@ -767,7 +789,7 @@ namespace Encryption
             }
             catch (CryptographicException e)
             {
-                MessageBox.Show("您输入的密钥有误。","错误",MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show("您输入的密钥有误。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }
@@ -820,6 +842,12 @@ namespace Encryption
                 }
             }
 
+            //清理cache目录
+            if (Directory.Exists(startupDirectory + "\\cache"))
+            {
+                Directory.Delete(startupDirectory + "\\cache",true);
+            }
+
             //检查自动更新配置
             string updateConfigPath = startupDirectory + "\\updater.ini";
             IniFile updateini = new IniFile(updateConfigPath);
@@ -831,10 +859,10 @@ namespace Encryption
 
 
             //拉起自动更新
-            Process.Start(startupDirectory + "\\br_updater.exe");
-
+            Process update_process = Process.Start(startupDirectory + "\\br_updater.exe");
+            
             //更新自解压check
-            switch(ini.readValue("config", "selfextract"))
+            switch (ini.readValue("config", "selfextract"))
             {
                 default:
                     cb_selfextract.IsChecked = false;
@@ -859,6 +887,21 @@ namespace Encryption
                     break;
                 case "3":
                     radio_extract_c.IsChecked = true;
+                    break;
+            }
+            switch (ini.readValue("config", "showMessageBox"))
+            {
+                case "true":
+                    showMessageBox = true;
+                    cb_messageBox.IsChecked = true;
+                    break;
+                case "false":
+                    showMessageBox = false;
+                    cb_messageBox.IsChecked = false;
+                    break;
+                default:
+                    showMessageBox = true;
+                    cb_messageBox.IsChecked = true;
                     break;
             }
         }
@@ -909,7 +952,8 @@ namespace Encryption
                 {
                     isDeleteOrigin = true;
                     isDeleteOriginMessage = true;
-                } else
+                }
+                else
                 {
                     isDeleteOrigin = false;
                     cb_deleteOrigin.IsChecked = false;
@@ -975,6 +1019,16 @@ namespace Encryption
                     ini.writeValue("config", "extractmode", "1");
                     break;
             }
+            if ((bool)cb_messageBox.IsChecked)
+            {
+                ini.writeValue("config", "showMessageBox", "true");
+            }
+            else
+            {
+                ini.writeValue("config", "showMessageBox", "false");
+            }
+            //主窗体退出后结束进程
+            Environment.Exit(0);
         }
 
         //自解压复选框UI逻辑
@@ -990,6 +1044,22 @@ namespace Encryption
             radio_extract_a.Visibility = Visibility.Hidden;
             radio_extract_b.Visibility = Visibility.Hidden;
             radio_extract_c.Visibility = Visibility.Hidden;
+        }
+
+        //弹框复选框逻辑
+        private void cb_messageBox_Checked(object sender, RoutedEventArgs e)
+        {
+            showMessageBox = true;
+        }
+
+        private void cb_messageBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            showMessageBox = false;
+        }
+
+        private void btn_about_Click(object sender, RoutedEventArgs e)
+        {
+            about.Show();
         }
     }
 }

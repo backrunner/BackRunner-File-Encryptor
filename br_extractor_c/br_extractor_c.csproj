@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A14BD78B-8EED-4C38-B069-E85B3AE089CC}</ProjectGuid>
+    <ProjectGuid>{94597938-CE73-4B7F-BD36-2B3AA5FD66C0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>br_extractor</RootNamespace>
-    <AssemblyName>br_extractor_b</AssemblyName>
+    <AssemblyName>br_extractor_c</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
