@@ -6,9 +6,9 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Encryption"
         mc:Ignorable="d"
-        Title="关于" Height="239.466" Width="509.792" ResizeMode="NoResize" Loaded="aboutSoftware_Loaded">
+        Title="关于" Height="239.466" Width="509.792" ResizeMode="NoResize" Loaded="aboutSoftware_Loaded" Closed="aboutSoftware_Closed">
     <Grid>
-        <Label Content="文件加密器" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="69" Height="25"/>
+        <Label Content="文件加密器" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="73" Height="25"/>
         <Label Content="CopyRight © 2017-2018 BackRunner" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="269" Height="25"/>
         <Label x:Name="lbl_ver" Content="" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="208" Height="25"/>
         <Label Content="本软件基于GPLv3协议开源。" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top" Width="474" Grid.ColumnSpan="2" Height="25"/>

@@ -34,6 +34,8 @@ namespace br_extractor
         public static string tempPath = Environment.GetEnvironmentVariable("TEMP");
         public static string cachePath = tempPath + "/" + Path.GetFileNameWithoutExtension(startupPath) + ".brtemp";
 
+        public static short processKeyMode = 2;
+
         private bool extract_file()
         {
             try
@@ -104,13 +106,16 @@ namespace br_extractor
                             byte[] buffer;
                             buffer = br.ReadBytes(256);
                             //第一个块为密钥检测
-                            byte[] des_check = decrypt_aes(buffer, key);
+                            byte[] des_check = decrypt_aes(buffer, key,0,true);
                             //检测是否正确
                             if (des_check == null)
                             {
                                 br.Close();
                                 File.Delete(cachePath);
                                 return false;
+                            } else
+                            {
+                                key = processKey(key);
                             }
                             //如果文件存在
                             if (File.Exists(des_path))
@@ -159,53 +164,91 @@ namespace br_extractor
                 return false;
             }
         }
-        
+
         //解密算法
-        public static byte[] decrypt_aes(byte[] block, string key)
+        public static byte[] decrypt_aes(byte[] block, string key, short retry = 0, bool istry = false)
         {
-            byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
-            RijndaelManaged rDel = new RijndaelManaged();
-            rDel.Key = keyArray;
-            rDel.Mode = CipherMode.ECB;
-            rDel.Padding = PaddingMode.PKCS7;
-            ICryptoTransform cTransform = rDel.CreateDecryptor();
-
+            RijndaelManaged rdel = new RijndaelManaged();
+            ICryptoTransform cTransform;
+            string originKey = key;
+            if (istry)
+            {
+                key = processKey(key);
+            }
             try
             {
-                return cTransform.TransformFinalBlock(block, 0, block.Length);
-            }
-            catch (CryptographicException e)
-            {
-                MessageBox.Show("您输入的密钥有误。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-        }
-
-        //对key进行MD5处理
-        public static string processKey(string key)
-        {
-            try
-            {
-                byte[] source = Encoding.UTF8.GetBytes(key);
-                MD5 md5 = MD5.Create();
-                byte[] result = md5.ComputeHash(source);
-                StringBuilder strb = new StringBuilder(40);
-                for (int i = 0; i < result.Length; i++)
+                switch (processKeyMode)
                 {
-                    strb.Append(result[i].ToString("x2"));
+                    case 1:
+                        byte[] keyArray = Encoding.UTF8.GetBytes(key);
+                        byte[] iv = Encoding.UTF8.GetBytes(key.Substring(7, 16));
+                        rdel.IV = iv;
+                        rdel.Key = keyArray;
+                        rdel.Mode = CipherMode.CFB;
+                        rdel.Padding = PaddingMode.PKCS7;
+                        cTransform = rdel.CreateDecryptor();
+                        break;
+                    default:
+                        keyArray = Encoding.UTF8.GetBytes(key.Substring(92, 32));
+                        string _iv = key.Substring(31, 16);
+                        iv = Encoding.UTF8.GetBytes(_iv);
+                        rdel.Mode = CipherMode.CFB;
+                        rdel.Padding = PaddingMode.PKCS7;
+                        cTransform = rdel.CreateDecryptor(keyArray, iv);
+                        break;
                 }
-                return strb.ToString();
+                return cTransform.TransformFinalBlock(block, 0, block.Length);
             }
             catch (Exception e)
             {
-                MessageBox.Show("处理Key的时候发生错误。\n\n错误信息：\n\n" + e.Message);
-                return "";
+                if (retry >= 1)
+                {
+                    MessageBox.Show("尝试解密错误，请检查你输入的密钥。\n\n错误信息：\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                }
+                else
+                {
+                    processKeyMode++;
+                    if (processKeyMode > 2)
+                    {
+                        processKeyMode = 1;
+                    }
+                    return decrypt_aes(block, originKey, ++retry, true);
+                }
+            }
+        }
+        //处理Key
+        public static string processKey(string key)
+        {
+            switch (processKeyMode)
+            {
+                case 1:
+                    byte[] source = Encoding.UTF8.GetBytes(key);
+                    MD5 md5 = MD5.Create();
+                    byte[] result = md5.ComputeHash(source);
+                    StringBuilder strb = new StringBuilder(40);
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        strb.Append(result[i].ToString("x2"));
+                    }
+                    md5.Clear();
+                    return strb.ToString();
+                default:
+                    source = Encoding.UTF8.GetBytes(key);
+                    SHA512 sha512 = SHA512.Create();
+                    result = sha512.ComputeHash(source);
+                    strb = new StringBuilder(260);
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        strb.Append(result[i].ToString("x2"));
+                    }
+                    return strb.ToString();
             }
         }
 
         private void btn_submit_Click(object sender, RoutedEventArgs e)
         {
-            string key = processKey(pwd_input.Password);
+            string key = pwd_input.Password;
             if (extract_file())
             {
                 if (!decrypt_file(cachePath, key))

@@ -27,6 +27,7 @@
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button x:Name="btn_batch" Content="批量加/解密" Click="btn_batch_Click" />
+            <Button x:Name="btn_settings" Content="设置" Click="btn_settings_Click"/>
             <Button x:Name="btn_about" Content="关于" Click="btn_about_Click"/>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>

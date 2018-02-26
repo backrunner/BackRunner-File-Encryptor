@@ -24,12 +24,13 @@ namespace Encryption
         }
 
         //版本号
-        public const string version = "1.0";
-        public const int build = 16;
+        public const string version = "1.1";
+        public const int build = 25;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
         public static string startupDirectory = Path.GetDirectoryName(startupPath);
+        public static string configPath = startupDirectory + "\\config.ini";
 
         //加密文件的位置
         public string filePath;
@@ -37,6 +38,11 @@ namespace Encryption
         //mode 0:单文件
         //mode 1:文件夹
         public short mode = 0;
+        //密钥设置
+        //mode 1:md5
+        //mode 2:sha512
+        public static short originProcessKeyMode = 2;
+        public static short processKeyMode = 2;
 
         //自解压设置
         //mode 1:普通
@@ -55,7 +61,8 @@ namespace Encryption
         public static bool isSelfExtract = false;
 
         //载入about窗体
-        private about about = new about();
+        public static bool isAboutOpened = false;
+        public static bool isSettingsOpened = false;
 
         private void btn_selectFile_Click(object sender, RoutedEventArgs e)
         {
@@ -109,10 +116,6 @@ namespace Encryption
                             MessageBox.Show("请先输入密钥。");
                             return;
                         }
-                        else
-                        {
-                            key = processKey(key);
-                        }
                         if (Path.GetExtension(filePath) == ".brencrypted")
                         {
                             MessageBox.Show("请勿二次加密加密文件。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -136,10 +139,6 @@ namespace Encryption
                         {
                             MessageBox.Show("请先输入密钥。");
                             return;
-                        }
-                        else
-                        {
-                            key = processKey(key);
                         }
                         //确认加密
                         if (MessageBox.Show("您确定要加密该文件夹下的所有文件吗？\n程序会自动重命名文件名相同但格式不同的文件。", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
@@ -248,10 +247,6 @@ namespace Encryption
                             MessageBox.Show("请先输入密钥。");
                             return;
                         }
-                        else
-                        {
-                            key = processKey(key);
-                        }
                         if (Path.GetExtension(filePath) == ".brencrypted")
                         {
                             MessageBox.Show("请勿二次加密加密文件。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -277,10 +272,6 @@ namespace Encryption
                         {
                             MessageBox.Show("请先输入密钥。");
                             return;
-                        }
-                        else
-                        {
-                            key = processKey(key);
                         }
                         //确认加密
                         if (MessageBox.Show("您确定要加密该文件夹下的所有文件吗？\n程序会自动重命名文件名相同但格式不同的文件。", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
@@ -397,7 +388,14 @@ namespace Encryption
             if (File.Exists(extractorPath))
             {
                 BinaryReader br = new BinaryReader(new FileStream(extractorPath, FileMode.Open, FileAccess.Read));
-                BinaryReader tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open, FileAccess.Read));
+                BinaryReader tempbr;
+                if (File.Exists(cachePath))
+                {
+                    tempbr = new BinaryReader(new FileStream(cachePath, FileMode.Open, FileAccess.Read));
+                } else
+                {
+                    return false;
+                }
                 BinaryWriter bw = new BinaryWriter(new FileStream(outputPath, FileMode.Create));
 
                 try
@@ -486,94 +484,105 @@ namespace Encryption
         //加密文件
         private bool encrypt_file(string filePath, string key)
         {
-            try
+            string encryptedFilePath;
+            string encryptedExePath = "";
+
+            //复原Processkeymode
+            processKeyMode = originProcessKeyMode;
+            key = processKey(key);
+
+            if (isSelfExtract)
             {
-                string encryptedFilePath;
-                if (isSelfExtract)
-                {
-                    encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";
-                }
-                else
-                {
-                    encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted";
-                }
-                if (File.Exists(encryptedFilePath))
-                {
-                    if (isSelfExtract)
-                    {
-                        if (MessageBox.Show("当前文件：\n" + Path.GetFileName(filePath) + "\n加密后的文件已存在，是否覆盖？", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        File.Delete(encryptedFilePath);
-                    }
-                }
-                //读文件流
-                using (FileStream fs = new FileStream(filePath, FileMode.Open))
-                {
-                    using (BinaryReader br = new BinaryReader(fs, new UTF8Encoding()))
-                    {
-                        //先定义写入流
-                        BinaryWriter bw;
-                        //获取扩展名做文件头，文件头填充到64bytes
-                        string extension = Path.GetExtension(filePath);
-                        byte[] extension_byte = Encoding.UTF8.GetBytes(extension);
-                        //填充扩展名的块到64bytes
-                        byte[] extension_filled = new byte[64];
-                        for (int i = 0; i < extension_byte.Length; i++)
-                        {
-                            extension_filled[i] = extension_byte[i];
-                        }
-                        //向加密文件写入文件头
-                        bw = new BinaryWriter(new FileStream(encryptedFilePath, FileMode.Create, FileAccess.ReadWrite));
-                        bw.Write(extension_filled);
+                encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypttemp";
+                encryptedExePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted.exe";
+            }
+            else
+            {
+                encryptedFilePath = Path.GetDirectoryName(filePath) + "\\" + Path.GetFileNameWithoutExtension(filePath) + ".brencrypted";
+            }
 
-                        byte[] buffer;
-                        //缓冲区
-                        buffer = br.ReadBytes(240);
-                        while (buffer.Length > 0)
-                        {
-                            byte[] encrypted = encrypt_aes(buffer, key);
-                            bw.Write(encrypted);
-                            buffer = br.ReadBytes(240);
-                        }
-                        bw.Flush();
-                        br.Close();
-                        bw.Close();
-                        //弹出成功框
-                        if (mode == 0 && !isSelfExtract && showMessageBox)
-                        {
-                            if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
-                            {
-                                Process.Start(Path.GetDirectoryName(filePath));
-                            }
-                        }
-                        //删除源文件
-                        if (!isSelfExtract && isDeleteOrigin)
-                        {
-                            try
-                            {
-                                File.Delete(filePath);
-                            }
-                            catch (Exception e)
-                            {
-                                if (mode == 0)
-                                {
-                                    throw (e);
-                                }
-                            }
-
-                        }
+            if (isSelfExtract)
+            {
+                if (File.Exists(encryptedExePath))
+                {
+                    if (MessageBox.Show("当前文件：\n" + Path.GetFileName(filePath) + "\n加密后的文件已存在，是否覆盖？", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
+                    {
                         return true;
                     }
                 }
             }
+            else
+            {
+                if (File.Exists(encryptedFilePath))
+                {
+                    if (MessageBox.Show("当前文件：\n" + Path.GetFileName(filePath) + "\n加密后的文件已存在，是否覆盖？", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
+                    {
+                        return true;
+                    }
+                }
+            }
+            FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            BinaryReader br = new BinaryReader(fs, new UTF8Encoding());
+            //获取扩展名做文件头，文件头填充到64bytes
+            string extension = Path.GetExtension(filePath);
+            byte[] extension_byte = Encoding.UTF8.GetBytes(extension);
+            //填充扩展名的块到64bytes
+            byte[] extension_filled = new byte[64];
+            for (int i = 0; i < extension_byte.Length; i++)
+            {
+                extension_filled[i] = extension_byte[i];
+            }
+            //向加密文件写入文件头
+            BinaryWriter bw = new BinaryWriter(new FileStream(encryptedFilePath, FileMode.Create, FileAccess.ReadWrite));
+            bw.Write(extension_filled);
+            try
+            {           
+                byte[] buffer;
+                //缓冲区
+                buffer = br.ReadBytes(240);
+                while (buffer.Length > 0)
+                {
+                    byte[] encrypted = encrypt_aes(buffer, key);
+                    bw.Write(encrypted);
+                    buffer = br.ReadBytes(240);
+                }
+                bw.Flush();
+                br.Close();
+                bw.Close();
+                //弹出成功框
+                if (mode == 0 && !isSelfExtract && showMessageBox)
+                {
+                    if (MessageBox.Show("文件加密完成，是否打开文件夹？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                    {
+                        Process.Start(Path.GetDirectoryName(filePath));
+                    }
+                }
+                //删除源文件
+                if (!isSelfExtract && isDeleteOrigin)
+                {
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception e)
+                    {
+                        if (mode == 0)
+                        {
+                            MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                    }
+
+                }
+                return true;
+
+            }
             catch (Exception e)
             {
                 MessageBox.Show("加密文件错误。错误信息：\n" + e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                br.Close();
+                bw.Flush();
+                bw.Close();
+                File.Delete(encryptedFilePath);
                 return false;
             }
         }
@@ -598,10 +607,6 @@ namespace Encryption
                         MessageBox.Show("请先输入密钥。");
                         return;
                     }
-                    else
-                    {
-                        key = processKey(key);
-                    }
                     decrypt_file(filePath, key);
                     break;
                 case 1:
@@ -618,10 +623,6 @@ namespace Encryption
                     {
                         MessageBox.Show("请先输入密钥。");
                         return;
-                    }
-                    else
-                    {
-                        key = processKey(key);
                     }
                     if (MessageBox.Show("您确定要解密该文件夹下的所有加密文件吗？", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
                     {
@@ -673,6 +674,8 @@ namespace Encryption
         //解密文件
         private bool decrypt_file(string filePath, string key)
         {
+            //复原Processkeymode
+            processKeyMode = originProcessKeyMode;
             try
             {
                 using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -692,11 +695,15 @@ namespace Encryption
                             byte[] buffer;
                             buffer = br.ReadBytes(256);
                             //第一个块为密钥检测
-                            byte[] des_check = decrypt_aes(buffer, key);
+                            byte[] des_check = decrypt_aes(buffer, key, 0, true);
                             //检测是否正确
                             if (des_check == null)
                             {
                                 return false;
+                            }
+                            else
+                            {
+                                key = processKey(key);
                             }
                             //如果文件存在
                             if (File.Exists(des_path))
@@ -739,7 +746,7 @@ namespace Encryption
                                 {
                                     if (mode == 0)
                                     {
-                                        throw (e);
+                                        MessageBox.Show(e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                                     }
                                 }
                             }
@@ -758,54 +765,112 @@ namespace Encryption
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message + "\nEncrypt File Error");
                 MessageBox.Show("解密文件错误。错误信息：\n" + e.Message);
                 return false;
             }
         }
         //加密算法
         public static byte[] encrypt_aes(byte[] block, string key)
-        {
-            byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
-            RijndaelManaged rdel = new RijndaelManaged();
-            rdel.Key = keyArray;
-            rdel.Mode = CipherMode.ECB;
-            rdel.Padding = PaddingMode.PKCS7;
-            ICryptoTransform transform = rdel.CreateEncryptor();
-            return transform.TransformFinalBlock(block, 0, block.Length);
+        {                     
+            RijndaelManaged rdel = new RijndaelManaged();            
+            switch (processKeyMode) {
+                case 1:
+                    byte[] keyArray = Encoding.UTF8.GetBytes(key);
+                    rdel.Key = keyArray;
+                    byte[] iv = Encoding.UTF8.GetBytes(key.Substring(7, 16));
+                    rdel.IV = iv;
+                    rdel.Mode = CipherMode.CFB;
+                    rdel.Padding = PaddingMode.PKCS7;
+                    ICryptoTransform transform = rdel.CreateEncryptor();
+                    return transform.TransformFinalBlock(block, 0, block.Length);
+                default:
+                    keyArray = Encoding.UTF8.GetBytes(key.Substring(92,32));
+                    string _iv = key.Substring(31, 16);
+                    iv = Encoding.UTF8.GetBytes(_iv);
+                    rdel.Mode = CipherMode.CFB;
+                    rdel.Padding = PaddingMode.PKCS7;
+                    transform = rdel.CreateEncryptor(keyArray, iv);
+                    return transform.TransformFinalBlock(block, 0, block.Length);
+            }           
         }
         //解密算法
-        public static byte[] decrypt_aes(byte[] block, string key)
+        public static byte[] decrypt_aes(byte[] block, string key,short retry=0,bool istry=false)
         {
-            byte[] keyArray = UTF8Encoding.UTF8.GetBytes(key);
-            RijndaelManaged rDel = new RijndaelManaged();
-            rDel.Key = keyArray;
-            rDel.Mode = CipherMode.ECB;
-            rDel.Padding = PaddingMode.PKCS7;
-            ICryptoTransform cTransform = rDel.CreateDecryptor();
-
+            RijndaelManaged rdel = new RijndaelManaged();
+            ICryptoTransform cTransform;
+            string originKey = key;
+            if (istry)
+            {
+                key = processKey(key);
+            }
             try
             {
+                switch (processKeyMode)
+                {
+                    case 1:
+                        byte[] keyArray = Encoding.UTF8.GetBytes(key);
+                        byte[] iv = Encoding.UTF8.GetBytes(key.Substring(7, 16));
+                        rdel.IV = iv;
+                        rdel.Key = keyArray;
+                        rdel.Mode = CipherMode.CFB;
+                        rdel.Padding = PaddingMode.PKCS7;
+                        cTransform = rdel.CreateDecryptor();
+                        break;
+                    default:
+                        keyArray = Encoding.UTF8.GetBytes(key.Substring(92, 32));
+                        string _iv = key.Substring(31, 16);
+                        iv = Encoding.UTF8.GetBytes(_iv);
+                        rdel.Mode = CipherMode.CFB;
+                        rdel.Padding = PaddingMode.PKCS7;
+                        cTransform = rdel.CreateDecryptor(keyArray, iv);
+                        break;
+                }
                 return cTransform.TransformFinalBlock(block, 0, block.Length);
             }
-            catch (CryptographicException e)
+            catch (Exception e)
             {
-                MessageBox.Show("您输入的密钥有误。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
+                if (retry>=1)
+                {
+                    MessageBox.Show("尝试解密错误，请检查你输入的密钥。\n\n错误信息：\n"+e.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                } else
+                {
+                    processKeyMode++;
+                    if (processKeyMode > 2)
+                    {
+                        processKeyMode = 1;
+                    }
+                    return decrypt_aes(block, originKey, ++retry,true);
+                }                
             }
         }
-        //对key进行MD5处理
+        //处理Key
         public static string processKey(string key)
         {
-            byte[] source = Encoding.UTF8.GetBytes(key);
-            MD5 md5 = MD5.Create();
-            byte[] result = md5.ComputeHash(source);
-            StringBuilder strb = new StringBuilder(40);
-            for (int i = 0; i < result.Length; i++)
+            switch (processKeyMode)
             {
-                strb.Append(result[i].ToString("x2"));
+                case 1:
+                    byte[] source = Encoding.UTF8.GetBytes(key);
+                    MD5 md5 = MD5.Create();
+                    byte[] result = md5.ComputeHash(source);
+                    StringBuilder strb = new StringBuilder(40);
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        strb.Append(result[i].ToString("x2"));
+                    }
+                    md5.Clear();
+                    return strb.ToString();
+                default:
+                    source = Encoding.UTF8.GetBytes(key);
+                    SHA512 sha512 = SHA512.Create();
+                    result = sha512.ComputeHash(source);
+                    strb = new StringBuilder(260);
+                    for (int i = 0; i < result.Length; i++)
+                    {
+                        strb.Append(result[i].ToString("x2"));
+                    }
+                    return strb.ToString();
             }
-            return strb.ToString();
         }
 
         //窗体load
@@ -821,7 +886,6 @@ namespace Encryption
             }
 
             //ini检查
-            string configPath = startupDirectory + "\\config.ini";
             IniFile ini = new IniFile(configPath);
             string _version = ini.readValue("app", "version");
             if (_version == "")
@@ -896,6 +960,7 @@ namespace Encryption
                     radio_extract_c.IsChecked = true;
                     break;
             }
+            //messageBox check
             switch (ini.readValue("config", "showMessageBox"))
             {
                 case "true":
@@ -911,6 +976,17 @@ namespace Encryption
                     cb_messageBox.IsChecked = true;
                     break;
             }
+            //keymode
+            switch (ini.readValue("config", "processKeyMode"))
+            {
+                case "1":
+                    originProcessKeyMode = 1;
+                    break;
+                default:
+                    originProcessKeyMode = 2;
+                    break;
+            }
+            processKeyMode = originProcessKeyMode;
         }
 
         //右上角菜单定义
@@ -998,8 +1074,7 @@ namespace Encryption
         //窗体退出
         private void window_main_Closed(object sender, EventArgs e)
         {
-            //保存设置
-            string configPath = startupDirectory + "\\config.ini";
+            //保存设置            
             IniFile ini = new IniFile(configPath);
             //自解压
             if ((bool)cb_selfextract.IsChecked)
@@ -1034,6 +1109,18 @@ namespace Encryption
             {
                 ini.writeValue("config", "showMessageBox", "false");
             }
+            switch (originProcessKeyMode)
+            {
+                case 1:
+                    ini.writeValue("config", "processKeyMode", "1");
+                    break;
+                case 2:
+                    ini.writeValue("config", "processKeyMode", "2");
+                    break;
+                default:
+                    ini.writeValue("config", "processKeyMode", "3");
+                    break;
+            }
             //主窗体退出后结束进程
             Environment.Exit(0);
         }
@@ -1066,7 +1153,22 @@ namespace Encryption
 
         private void btn_about_Click(object sender, RoutedEventArgs e)
         {
-            about.Show();
+            if (!isAboutOpened)
+            {
+                about about = new about();
+                about.Show();
+                isAboutOpened = true;
+            }
+        }
+
+        private void btn_settings_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isSettingsOpened)
+            {
+                settings settings = new settings();
+                settings.Show();
+                isSettingsOpened = true;
+            }
         }
     }
 }

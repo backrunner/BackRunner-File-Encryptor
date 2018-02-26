@@ -37,5 +37,10 @@ namespace Encryption
         {
             lbl_ver.Content = "Version: " + MainWindow.version + "  Build: " + MainWindow.build;            
         }
+
+        private void aboutSoftware_Closed(object sender, EventArgs e)
+        {
+            MainWindow.isAboutOpened = false;
+        }
     }
 }
