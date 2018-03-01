@@ -15,7 +15,7 @@
         <Button x:Name="btn_decrypt" Content="解密" HorizontalAlignment="Left" Margin="511,195,0,0" VerticalAlignment="Top" Width="71" Click="btn_decrypt_Click"/>
         <Button x:Name="btn_encrypt" Content="加密" HorizontalAlignment="Left" Margin="435,195,0,0" VerticalAlignment="Top" Width="71" Click="btn_encrypt_Click"/>
         <Label Content="密钥：" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" Width="92"/>
-        <PasswordBox x:Name="pwd_key"  HorizontalAlignment="Left" Margin="10,101,0,0" VerticalAlignment="Top" Width="572"/>
+        <PasswordBox x:Name="pwd_key"  HorizontalAlignment="Left" Margin="10,101,0,0" VerticalAlignment="Top" Width="572" KeyDown="pwd_key_KeyDown"/>
         <Label x:Name="lbl_progress" Content="" HorizontalAlignment="Left" Margin="10,197,0,0" VerticalAlignment="Top" Width="410"/>
         <CheckBox x:Name="cb_selfextract" Content="自解压" HorizontalAlignment="Left" Margin="10,140,0,0" VerticalAlignment="Top" Checked="cb_selfextract_Checked" Unchecked="cb_selfextract_Unchecked"/>
         <CheckBox x:Name="cb_deleteOrigin" Content="加/解密完成后删除源文件" HorizontalAlignment="Left" Margin="104,140,0,0" VerticalAlignment="Top" Checked="cb_deleteOrigin_Checked" Unchecked="cb_deleteOrigin_Unchecked"/>
@@ -26,7 +26,7 @@
     </Grid>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
-            <Button x:Name="btn_batch" Content="批量加/解密" Click="btn_batch_Click" />
+            <Button x:Name="btn_batch" Content="加/解密文件夹" Click="btn_batch_Click" />
             <Button x:Name="btn_settings" Content="设置" Click="btn_settings_Click"/>
             <Button x:Name="btn_about" Content="关于" Click="btn_about_Click"/>
         </Controls:WindowCommands>

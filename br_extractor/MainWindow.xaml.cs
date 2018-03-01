@@ -143,7 +143,7 @@ namespace br_extractor
                             File.Delete(cachePath);
                             if (MessageBox.Show("文件解密完成，是否打开文件？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                             {
-                                Process.Start(filePath);
+                                Process.Start(des_path);
                             }                            
                         }
                     }
@@ -217,6 +217,7 @@ namespace br_extractor
                 }
             }
         }
+
         //处理Key
         public static string processKey(string key)
         {
@@ -260,6 +261,14 @@ namespace br_extractor
             {
                 File.Delete(cachePath);
                 Environment.Exit(0);
+            }
+        }
+
+        private void pwd_input_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                btn_submit_Click(sender, e);
             }
         }
     }

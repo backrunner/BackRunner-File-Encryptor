@@ -10,6 +10,7 @@ using BackRunner;
 using System.Linq;
 using System.Security.Permissions;
 using System.Security;
+using System.Windows.Input;
 
 namespace Encryption
 {
@@ -25,7 +26,7 @@ namespace Encryption
 
         //版本号
         public const string version = "1.1";
-        public const int build = 25;
+        public const int build = 28;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -116,7 +117,7 @@ namespace Encryption
                             MessageBox.Show("请先输入密钥。");
                             return;
                         }
-                        if (Path.GetExtension(filePath) == ".brencrypted")
+                        if (Path.GetExtension(filePath) == ".brencrypted" || (Path.GetExtension(filePath) == ".exe" && filePath.Contains(".brencrypted")))
                         {
                             MessageBox.Show("请勿二次加密加密文件。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
@@ -756,7 +757,7 @@ namespace Encryption
                         {
                             if (mode == 0)
                             {
-                                MessageBox.Show("这不是一个由本程序加密过的文件。");
+                                MessageBox.Show("这不是一个由本程序加密过的文件。","错误",MessageBoxButton.OK,MessageBoxImage.Error);
                             }
                             return false;
                         }
@@ -1168,6 +1169,25 @@ namespace Encryption
                 settings settings = new settings();
                 settings.Show();
                 isSettingsOpened = true;
+            }
+        }
+
+        //密码框触发
+        private void pwd_key_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                if (mode == 0)
+                {
+                    if (txt_file.Text.Contains(".brencrypted"))
+                    {
+                        btn_decrypt_Click(sender, e);
+                    }
+                    else
+                    {
+                        btn_encrypt_Click(sender, e);
+                    }
+                }
             }
         }
     }

@@ -453,5 +453,13 @@ namespace br_extractor
                 Environment.Exit(0);
             }
         }
+
+        private void pwd_input_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                btn_submit_Click(sender, e);
+            }
+        }
     }
 }
