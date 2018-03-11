@@ -6,12 +6,15 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Encryption"
         mc:Ignorable="d"
-        Title="设置" Height="133.929" Width="500" ResizeMode="NoResize" Loaded="settingsWindow_Loaded" Closed="settingsWindow_Closed">
+        Title="设置" Height="191.726" Width="500" ResizeMode="NoResize" Loaded="settingsWindow_Loaded" Closed="settingsWindow_Closed">
     <Grid>
         <Label Content="Key处理模式" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="78" Padding="1,5,5,5"/>
-        <RadioButton x:Name="rb_processkey_md5" Content="MD5" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Checked="rb_processkey_md5_Checked"/>
-        <RadioButton x:Name="rb_processkey_sha512" Content="SHA512" HorizontalAlignment="Left" Margin="90,40,0,0" VerticalAlignment="Top" Checked="rb_processkey_sha512_Checked"/>
-        <Button x:Name="btn_save" Content="保存" HorizontalAlignment="Left" Margin="418,64,0,0" VerticalAlignment="Top" Width="66" Click="btn_save_Click"/>
+        <RadioButton x:Name="rb_processkey_md5" Content="MD5" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Checked="rb_processkey_md5_Checked" FontFamily="Microsoft YaHei UI"/>
+        <RadioButton x:Name="rb_processkey_sha512" Content="SHA512" HorizontalAlignment="Left" Margin="90,40,0,0" VerticalAlignment="Top" Checked="rb_processkey_sha512_Checked" FontFamily="Microsoft YaHei UI"/>
+        <Button x:Name="btn_save" Content="保存" HorizontalAlignment="Left" Margin="418,126,0,0" VerticalAlignment="Top" Width="66" Click="btn_save_Click"/>
+        <Label Content="自动更新" HorizontalAlignment="Left" Margin="10,63,0,0" VerticalAlignment="Top" Width="78" Padding="1,5,5,5"/>
+        <RadioButton x:Name="rb_update_on" Content="开" HorizontalAlignment="Left" Margin="10,91,0,0" VerticalAlignment="Top" Checked="rb_update_on_Checked" FontFamily="Microsoft YaHei UI" Width="52"/>
+        <RadioButton x:Name="rb_update_off" Content="关" HorizontalAlignment="Left" Margin="90,91,0,0" VerticalAlignment="Top" Checked="rb_update_off_Checked" Width="48" FontFamily="Microsoft YaHei UI"/>
 
     </Grid>
 </Controls:MetroWindow>

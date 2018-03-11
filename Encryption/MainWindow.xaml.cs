@@ -25,13 +25,14 @@ namespace Encryption
         }
 
         //版本号
-        public const string version = "1.1";
-        public const int build = 28;
+        public const string version = "1.2";
+        public const int build = 30;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
         public static string startupDirectory = Path.GetDirectoryName(startupPath);
         public static string configPath = startupDirectory + "\\config.ini";
+        public static string updateConfigPath = startupDirectory + "\\updater.ini";
 
         //加密文件的位置
         public string filePath;
@@ -64,6 +65,9 @@ namespace Encryption
         //载入about窗体
         public static bool isAboutOpened = false;
         public static bool isSettingsOpened = false;
+
+        //状态
+        public static bool isUpdateEnable = true;
 
         private void btn_selectFile_Click(object sender, RoutedEventArgs e)
         {
@@ -275,7 +279,7 @@ namespace Encryption
                             return;
                         }
                         //确认加密
-                        if (MessageBox.Show("您确定要加密该文件夹下的所有文件吗？\n程序会自动重命名文件名相同但格式不同的文件。", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+                        if (MessageBox.Show("您确定要加密该文件夹下的所有文件吗？\n如果该目录下存在文件名相同但格式不同的文件，程序会对其进行自动编号。", "确认", MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
                         {
                             var files = Directory.GetFiles(filePath, "*");
                             //检查文件名以防止重叠
@@ -920,18 +924,21 @@ namespace Encryption
                 }
             }
 
-            //检查自动更新配置
-            string updateConfigPath = startupDirectory + "\\updater.ini";
+            //检查自动更新配置            
             IniFile updateini = new IniFile(updateConfigPath);
             string _name = updateini.readValue("app", "name");
             if (_name == "")
             {
                 updateini.writeValue("app", "name", "br_encryptor");
             }
+            string _enable = updateini.readValue("updater", "enable");
+            isUpdateEnable = BackRunner.Convert.str_to_bool(_enable);
 
-
-            //拉起自动更新
-            Process update_process = Process.Start(startupDirectory + "\\br_updater.exe");
+            if (isUpdateEnable)
+            {
+                //拉起自动更新
+                Process update_process = Process.Start(startupDirectory + "\\br_updater.exe");
+            }
 
             //更新自解压check
             switch (ini.readValue("config", "selfextract"))

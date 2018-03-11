@@ -56,7 +56,22 @@ namespace Encryption
 
         private void btn_save_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.originProcessKeyMode = processKeyMode;
+            MainWindow.originProcessKeyMode = processKeyMode;           
+            try
+            {
+                IniFile updateConfig = new IniFile(MainWindow.updateConfigPath);
+                if (MainWindow.isUpdateEnable)
+                {
+                    updateConfig.writeValue("updater", "enable", "true");
+                }
+                else
+                {
+                    updateConfig.writeValue("updater", "enable", "false");
+                }
+            } catch (Exception err)
+            {
+                MessageBox.Show("保存时出现错误。\n\n错误信息：\n"+err.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             MessageBox.Show("设置已保存成功。", "保存", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -70,6 +85,19 @@ namespace Encryption
         {
             rb_processkey_md5.IsChecked = false;
             processKeyMode = 2;
+        }
+
+        //自动更新逻辑
+        private void rb_update_on_Checked(object sender, RoutedEventArgs e)
+        {
+            rb_update_off.IsChecked = false;
+            MainWindow.isUpdateEnable = true;
+        }
+
+        private void rb_update_off_Checked(object sender, RoutedEventArgs e)
+        {
+            rb_update_on.IsChecked = false;
+            MainWindow.isUpdateEnable = false;
         }
     }
 }
