@@ -47,6 +47,16 @@ namespace Encryption
                     rb_processkey_sha512.IsChecked = true;
                     break;
             }
+            //获取自动更新
+            if (MainWindow.isUpdateEnable)
+            {
+                rb_update_on.IsChecked = true;
+                rb_update_off.IsChecked = false;
+            } else
+            {
+                rb_update_on.IsChecked = true;
+                rb_update_off.IsChecked = false;
+            }
         }
 
         private void settingsWindow_Closed(object sender, EventArgs e)
@@ -78,25 +88,21 @@ namespace Encryption
         //Processkeymode单选框UI逻辑
         private void rb_processkey_md5_Checked(object sender, RoutedEventArgs e)
         {
-            rb_processkey_sha512.IsChecked = false;
             processKeyMode = 1;
         }
         private void rb_processkey_sha512_Checked(object sender, RoutedEventArgs e)
         {
-            rb_processkey_md5.IsChecked = false;
             processKeyMode = 2;
         }
 
         //自动更新逻辑
         private void rb_update_on_Checked(object sender, RoutedEventArgs e)
         {
-            rb_update_off.IsChecked = false;
             MainWindow.isUpdateEnable = true;
         }
 
         private void rb_update_off_Checked(object sender, RoutedEventArgs e)
         {
-            rb_update_on.IsChecked = false;
             MainWindow.isUpdateEnable = false;
         }
     }

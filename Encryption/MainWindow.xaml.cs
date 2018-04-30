@@ -26,7 +26,7 @@ namespace Encryption
 
         //版本号
         public const string version = "1.2";
-        public const int build = 30;
+        public const int build = 32;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;
@@ -57,7 +57,7 @@ namespace Encryption
         public bool isDeleteOrigin = false;
 
         //提示弹窗
-        public bool showMessageBox = true;
+        public static bool showMessageBox = true;
 
         //自解压
         public static bool isSelfExtract = false;

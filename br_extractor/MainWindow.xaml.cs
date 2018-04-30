@@ -143,7 +143,7 @@ namespace br_extractor
                             File.Delete(cachePath);
                             if (MessageBox.Show("文件解密完成，是否打开文件？", "完成", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
                             {
-                                Process.Start(des_path);
+                                Process.Start(des_path);                                
                             }                            
                         }
                     }
@@ -254,12 +254,37 @@ namespace br_extractor
             {
                 if (!decrypt_file(cachePath, key))
                 {
+                    try
+                    {
+                        File.Delete(cachePath);
+                    } catch (Exception err)
+                    {
+                        
+                    }                    
+                    Environment.Exit(0);
+                } else
+                {
+                    try
+                    {
+                        File.Delete(cachePath);
+                    }
+                    catch (Exception err)
+                    {
+
+                    }
                     Environment.Exit(0);
                 }
             }
             else
             {
-                File.Delete(cachePath);
+                try
+                {
+                    File.Delete(cachePath);
+                }
+                catch (Exception err)
+                {
+
+                }
                 Environment.Exit(0);
             }
         }
