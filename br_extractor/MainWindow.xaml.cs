@@ -165,7 +165,6 @@ namespace br_extractor
             }
         }
 
-        //解密算法
         public static byte[] decrypt_aes(byte[] block, string key, short retry = 0, bool istry = false)
         {
             RijndaelManaged rdel = new RijndaelManaged();
@@ -217,7 +216,6 @@ namespace br_extractor
                 }
             }
         }
-
         //处理Key
         public static string processKey(string key)
         {

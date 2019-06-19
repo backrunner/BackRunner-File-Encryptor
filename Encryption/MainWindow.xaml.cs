@@ -25,8 +25,8 @@ namespace Encryption
         }
 
         //版本号
-        public const string version = "1.2";
-        public const int build = 32;
+        public const string version = "1.3";
+        public const int build = 33;
 
         //应用信息
         public static string startupPath = Process.GetCurrentProcess().MainModule.FileName;

@@ -34,7 +34,7 @@ namespace Updater
         //更新配置
         public string appName = "";
         public int maxRetry = 5;
-        public const string SERVER = "http://static.backrunner.top/app_updates";
+        public const string SERVER = "http://update.backrunner.top/brencryptor";
 
         //DLLImport
         [DllImport("wininet.dll")]

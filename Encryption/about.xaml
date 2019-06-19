@@ -9,10 +9,9 @@
         Title="关于" Height="239.466" Width="509.792" ResizeMode="NoResize" Loaded="aboutSoftware_Loaded" Closed="aboutSoftware_Closed">
     <Grid>
         <Label Content="文件加密器" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="73" Height="25"/>
-        <Label Content="CopyRight © 2017-2018 BackRunner" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="269" Height="25"/>
+        <Label Content="Developed by BackRunner" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top" Width="269" Height="25"/>
         <Label x:Name="lbl_ver" Content="" HorizontalAlignment="Left" Margin="10,60,0,0" VerticalAlignment="Top" Width="208" Height="25"/>
-        <Label Content="本软件基于GPLv3协议开源。" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top" Width="474" Grid.ColumnSpan="2" Height="25"/>
-        <Label Content="软件代码托管于：" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="474" Grid.ColumnSpan="2" Height="25"/>
-        <Label x:Name="lbl_gitlink" Content="https://coding.net/u/BackRunner/p/BackRunner-Encryptor/git" HorizontalAlignment="Left" Margin="15,163,0,0" VerticalAlignment="Top" Width="358" Foreground="#FF00A2FF" BorderThickness="0,0,0,1" BorderBrush="#FF00A2FF" Padding="0,5,0,0" Height="21" MouseLeftButtonUp="lbl_gitlink_MouseLeftButtonUp"/>
+        <Label Content="本软件基于MIT协议开源。" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Width="474" Height="25"/>
+        <Label x:Name="lbl_gitlink" Content="https://github.com/backrunner/BackRunner-File-Encryptor" HorizontalAlignment="Left" Margin="15,163,0,0" VerticalAlignment="Top" Width="358" Foreground="#FF00A2FF" BorderThickness="0,0,0,1" BorderBrush="#FF00A2FF" Padding="0,5,0,0" Height="21" MouseLeftButtonUp="lbl_gitlink_MouseLeftButtonUp"/>
     </Grid>
 </Controls:MetroWindow>
